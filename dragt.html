@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language App - Clickable Boxes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="clickable-box" id="box1"><img src="ttc.png" alt="TTC Logo"></div>
+    <div class="clickable-box" id="box2"><img src="khinkal.jpg" alt="Khinkali"></div>
+    <div class="clickable-box" id="box3"><img src="President_of_Georgia_Mikheil_Saakashvili_in_Tbilisi,_March_22,_2008.jpg" alt="Mikheil Saakashvili"></div>
+    <div class="clickable-box" id="box4"></div>
+    <div class="clickable-box" id="box5"></div>
+    <script>
+        const boxes = document.querySelectorAll('.clickable-box');
+        boxes.forEach(box => {
+            box.addEventListener('click', function() {
+                alert('Box ' + this.id + ' clicked!');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- More detailed human in a dress -->
+  <style>
+    .dress { fill: #FFC0CB; } /* Pink dress */
+    .skin { fill: #FFE0BD; } /* Light skin tone */
+    .hair { fill: #A52A2A; } /* Brown hair */
+  </style>
+  <!-- Head -->
+  <circle cx="50" cy="20" r="10" class="skin" />
+  <!-- Hair -->
+  <path d="M40 15 Q50 5 60 15 Q65 25 50 30 Q35 25 40 15 Z" class="hair" />
+  <!-- Body and Dress -->
+  <path d="M40 30 L30 80 L70 80 L60 30 Z" class="dress" />
+  <!-- Arms (simple representation) -->
+  <rect x="35" y="35" width="5" height="20" class="skin" />
+  <rect x="60" y="35" width="5" height="20" class="skin" />
+</svg>
