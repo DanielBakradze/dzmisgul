@@ -1,4 +1,4 @@
-# Georgian Learning App - Shape Up Documentation
+# Georgian Learning App - Shape Up Documentation v.1.0
 
 ## 1. Problem Definition
 
