@@ -1,4 +1,4 @@
-# Georgian Learning App - Shape Up Documentation v.1.0
+# Georgian Learning App - Shape Up Documentation v.2.0
 
 ## 1. Problem Definition
 
@@ -14,179 +14,469 @@ Help users learn at least **10 new Georgian words per week** through a simple, i
 
 ## 4. Core Solution (Breadboarding)
 
-We will build a small, focused web application consisting of a few static HTML pages, styled with basic CSS, and interactive elements powered by vanilla JavaScript. The application will guide the user through learning a set of words and then quizzing them.
+We will build a small, focused web application using React components and the shadcn/ui component library we've already set up. The application will guide the user through learning a set of words and then quizzing them using modern UI patterns.
 
-**Page Flow:**
+**Component Flow:**
 
-1.  **Home Page (`index.html`):**
-    *   Welcomes the user.
-    *   A single clickable box/button: "Learn Today's Words".
-    *   Clicking this navigates to the "Learn Words" page.
+1.  **Home View:**
+    *   Welcomes the user with a clean card-based layout.
+    *   A primary button: "Learn Today's Words".
+    *   Clicking this navigates to the "Learn Words" view.
 
-2.  **Learn Words Page (`learn.html`):**
-    *   Displays a list of 10 Georgian words alongside their English translations (this week's words).
+2.  **Learn Words View:**
+    *   Displays a list of 10 Georgian words alongside their English translations (this week's words) using Badge components.
     *   A button: "Start Quiz".
-    *   Clicking this navigates to the "Quiz" page.
+    *   Clicking this navigates to the "Quiz" view.
 
-3.  **Quiz Page (`quiz.html`):**
-    *   Presents one Georgian word at a time from the list of 10.
-    *   Offers 3-4 multiple-choice English translations for the displayed Georgian word.
+3.  **Quiz View:**
+    *   Presents one Georgian word at a time from the list of 10 using Card components.
+    *   Offers 3-4 multiple-choice English translations using Button components.
     *   User selects an answer.
     *   **Feedback:**
-        *   **Correct Answer:** Displays "Congratulations!" or similar. Provides an option/button to proceed to the "Next Question".
-        *   **Incorrect Answer:** Displays "Incorrect. The correct answer is [correct_translation]". Provides an option/button to go "Back to Learning" (`learn.html`) and an option/button for "Next Question".
-    *   Tracks the user's score.
-    *   After 10 questions, it displays the final score.
+        *   **Correct Answer:** Displays success Alert component. Provides a button to proceed to the "Next Question".
+        *   **Incorrect Answer:** Displays error Alert component with correct answer. Provides buttons for "Back to Learning" and "Next Question".
+    *   Tracks the user's score using Progress component.
+    *   After 10 questions, displays the final score.
 
-4.  **Results (Integrated into `quiz.html` after the 10th question):**
-    *   Displays the final score (e.g., "You scored 7/10!").
+4.  **Results View:**
+    *   Displays the final score using Card and Badge components.
     *   A message: "Well done! Come back next week to learn more words."
 
 ## 5. Key Functionality (Step-by-Step for Implementation)
 
-This plan assumes all HTML, CSS, and JavaScript will be vanilla (no frameworks or libraries beyond what the browser provides).
+This plan uses React with TypeScript, Vite, and the shadcn/ui component library that's already set up.
 
-### 5.1. Project Setup
+### 5.1. Project Structure
 
-*   Create a project folder (e.g., `georgian_learner`).
-*   Inside, create:
-    *   `index.html` (Home Page)
-    *   `learn.html` (Learn Words Page)
-    *   `quiz.html` (Quiz Page)
-    *   `style.css` (For all styling)
-    *   `script.js` (For all JavaScript logic, or embed JS in HTML files initially)
+The existing project structure is already set up with:
+*   React + TypeScript + Vite
+*   shadcn/ui components installed
+*   Tailwind CSS configured
+*   All necessary dependencies
 
-### 5.2. Word Data (JavaScript)
+### 5.2. Word Data (TypeScript)
 
-In your `script.js` (or within `<script>` tags in `learn.html` and `quiz.html`), define the list of 10 words for the week. This can be an array of objects:
+Create a new file `src/data/words.ts` to define the Georgian words:
 
-```javascript
-const weeklyWords = [
-    { georgian: "გამარჯობა", english: "Hello" },
-    { georgian: "მადლობა", english: "Thank you" },
-    { georgian: "კი", english: "Yes" },
-    { georgian: "არა", english: "No" },
-    { georgian: "ბოდიში", english: "Sorry" },
-    { georgian: "წყალი", english: "Water" },
-    { georgian: "პური", english: "Bread" },
-    { georgian: "კარგი", english: "Good" },
-    { georgian: "ნახვამდის", english: "Goodbye" },
-    { georgian: "მიყვარხარ", english: "I love you" } // Example word
+```typescript
+export interface GeorgianWord {
+  georgian: string;
+  english: string;
+  id: number;
+}
+
+export const weeklyWords: GeorgianWord[] = [
+  { id: 1, georgian: "გამარჯობა", english: "Hello" },
+  { id: 2, georgian: "მადლობა", english: "Thank you" },
+  { id: 3, georgian: "კი", english: "Yes" },
+  { id: 4, georgian: "არა", english: "No" },
+  { id: 5, georgian: "ბოდიში", english: "Sorry" },
+  { id: 6, georgian: "წყალი", english: "Water" },
+  { id: 7, georgian: "პური", english: "Bread" },
+  { id: 8, georgian: "კარგი", english: "Good" },
+  { id: 9, georgian: "ნახვამდის", english: "Goodbye" },
+  { id: 10, georgian: "მიყვარხარ", english: "I love you" }
 ];
 ```
 
-### 5.3. Home Page (`index.html`)
+### 5.3. State Management
 
-*   **HTML Structure:**
-    *   Basic HTML boilerplate.
-    *   Link to `style.css`.
-    *   A `<h1>` for the title (e.g., "Learn Georgian!").
-    *   A `<div>` or `<button>` with an ID (e.g., `id="learnButton"`) and text "Learn Today's Words".
-*   **JavaScript (in `script.js` or `<script>` tag):**
-    *   Add an event listener to `learnButton`.
-    *   On click, navigate to `learn.html` using `window.location.href = 'learn.html';`.
+Use React's built-in `useState` to manage application state. Create types in `src/types/app.ts`:
 
-### 5.4. Learn Words Page (`learn.html`)
+```typescript
+export type AppView = 'home' | 'learn' | 'quiz' | 'results';
 
-*   **HTML Structure:**
-    *   Basic HTML boilerplate.
-    *   Link to `style.css`.
-    *   A `<h1>` for the title (e.g., "Today's 10 Words").
-    *   A `<div>` (e.g., `id="wordListContainer"`) where words will be displayed.
-    *   A `<button>` (e.g., `id="startQuizButton"`) with text "Start Quiz".
-*   **JavaScript (in `script.js` or `<script>` tag):**
-    *   Function to display words:
-        *   Get `wordListContainer`.
-        *   Loop through `weeklyWords`.
-        *   For each word object, create HTML elements (e.g., `<p>Georgian: [word.georgian] - English: [word.english]</p>`) and append them to `wordListContainer`.
-    *   Call this function when the page loads.
-    *   Add an event listener to `startQuizButton`.
-    *   On click, navigate to `quiz.html` (`window.location.href = 'quiz.html';`).
+export interface QuizState {
+  currentQuestionIndex: number;
+  score: number;
+  selectedAnswer: string | null;
+  showFeedback: boolean;
+  quizCompleted: boolean;
+}
+```
 
-### 5.5. Quiz Page (`quiz.html`)
+### 5.4. Main App Component Structure
 
-This is the most complex part.
+Update `src/App.tsx` to handle different views:
 
-*   **HTML Structure:**
-    *   Basic HTML boilerplate.
-    *   Link to `style.css`.
-    *   A `<h1>` for the title (e.g., "Quiz Time!").
-    *   A `<div>` (e.g., `id="georgianWordDisplay"`) to show the current Georgian word.
-    *   A `<div>` (e.g., `id="optionsContainer"`) to hold the multiple-choice answer buttons.
-    *   A `<div>` (e.g., `id="feedbackDisplay"`) to show if the answer was correct/incorrect.
-    *   A `<div>` (e.g., `id="scoreDisplay"`) to show the current score (e.g., "Score: 0/10").
-    *   A `<button>` (e.g., `id="nextQuestionButton"`) initially hidden or disabled, text "Next Question".
-    *   A `<button>` (e.g., `id="backToLearnButton"`) initially hidden, text "Back to Learning".
-    *   A `<div>` (e.g., `id="finalResultDisplay"`) initially hidden, for the final score and message.
-*   **JavaScript (in `script.js` or `<script>` tag):**
-    *   **State Variables:**
-        *   `currentQuestionIndex = 0`
-        *   `score = 0`
-        *   `quizWords = [...weeklyWords]` (Consider shuffling `quizWords` for variety if time permits: `quizWords.sort(() => 0.5 - Math.random());`)
-    *   **DOM Element References:** Get all the necessary divs and buttons from HTML.
-    *   **`displayQuestion()` Function:**
-        *   If `currentQuestionIndex >= quizWords.length`, call `showFinalResults()` and return.
-        *   Get the current word: `const currentWord = quizWords[currentQuestionIndex];`
-        *   Display `currentWord.georgian` in `georgianWordDisplay`.
-        *   Clear `optionsContainer` and `feedbackDisplay`.
-        *   **Generate Options:**
-            *   Create an array `options = [currentWord.english]`.
-            *   Select 2-3 other *incorrect* English words from `weeklyWords` (ensure they are not the `currentWord.english`). Add them to `options`.
-            *   Shuffle the `options` array.
-            *   For each option in the shuffled array, create a `<button>`, set its text, add an event listener to it for `handleAnswer()`, and append it to `optionsContainer`.
-        *   Update `scoreDisplay`: `Score: ${score}/${quizWords.length}`.
-        *   Hide `nextQuestionButton` and `backToLearnButton`.
-    *   **`handleAnswer(selectedEnglishWord)` Function (called by option button clicks):**
-        *   Disable all option buttons to prevent multiple clicks.
-        *   `const correctAnswer = quizWords[currentQuestionIndex].english;`
-        *   If `selectedEnglishWord === correctAnswer`:
-            *   `score++`
-            *   `feedbackDisplay.textContent = "Congratulations! Correct!";`
-        *   Else:
-            *   `feedbackDisplay.textContent = `Incorrect. The correct answer is: ${correctAnswer}`;`
-            *   Show `backToLearnButton` (`backToLearnButton.onclick = () => window.location.href = 'learn.html';`).
-        *   Show `nextQuestionButton`.
-        *   Update `scoreDisplay`.
-    *   **`nextQuestionButton` Event Listener:**
-        *   `currentQuestionIndex++`
-        *   Call `displayQuestion()`.
-    *   **`showFinalResults()` Function:**
-        *   Hide `georgianWordDisplay`, `optionsContainer`, `feedbackDisplay`, `nextQuestionButton`, `backToLearnButton`.
-        *   `finalResultDisplay.innerHTML = `<h2>Your Final Score: ${score}/${quizWords.length}</h2><p>Well done! Come back next week to learn more words.</p>`;`
-        *   Show `finalResultDisplay`.
-    *   **Initial Call:** Call `displayQuestion()` when the page loads.
+```typescript
+import React, { useState } from 'react';
+import { AppView, QuizState } from './types/app';
+import HomeView from './components/HomeView';
+import LearnView from './components/LearnView';
+import QuizView from './components/QuizView';
+import ResultsView from './components/ResultsView';
 
-### 5.6. Styling (`style.css`)
+function App() {
+  const [currentView, setCurrentView] = useState<AppView>('home');
+  const [quizState, setQuizState] = useState<QuizState>({
+    currentQuestionIndex: 0,
+    score: 0,
+    selectedAnswer: null,
+    showFeedback: false,
+    quizCompleted: false
+  });
 
-*   Apply basic, clean styling to make the application usable and readable.
-*   Center content, style buttons, ensure good contrast.
-*   Example selectors:
-    *   `body { font-family: sans-serif; margin: 20px; background-color: #f0f0f0; }`
-    *   `.container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; }`
-    *   `button { padding: 10px 15px; margin: 5px; cursor: pointer; }`
-    *   `#optionsContainer button { display: block; width: 100%; margin-bottom: 10px; }`
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-4xl mx-auto">
+        {currentView === 'home' && <HomeView onNavigate={setCurrentView} />}
+        {currentView === 'learn' && <LearnView onNavigate={setCurrentView} />}
+        {currentView === 'quiz' && (
+          <QuizView 
+            quizState={quizState}
+            setQuizState={setQuizState}
+            onNavigate={setCurrentView}
+          />
+        )}
+        {currentView === 'results' && (
+          <ResultsView 
+            score={quizState.score}
+            total={10}
+            onNavigate={setCurrentView}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### 5.5. HomeView Component (`src/components/HomeView.tsx`)
+
+```typescript
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AppView } from '../types/app';
+
+interface HomeViewProps {
+  onNavigate: (view: AppView) => void;
+}
+
+export default function HomeView({ onNavigate }: HomeViewProps) {
+  return (
+    <div className="flex justify-center items-center min-h-[80vh]">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Learn Georgian! 🇬🇪</CardTitle>
+          <CardDescription>
+            Master 10 new Georgian words this week
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          <Button 
+            onClick={() => onNavigate('learn')}
+            size="lg"
+            className="w-full"
+          >
+            Learn Today's Words
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
+
+### 5.6. LearnView Component (`src/components/LearnView.tsx`)
+
+```typescript
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { weeklyWords } from '../data/words';
+import { AppView } from '../types/app';
+
+interface LearnViewProps {
+  onNavigate: (view: AppView) => void;
+}
+
+export default function LearnView({ onNavigate }: LearnViewProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Today's 10 Words</CardTitle>
+        <CardDescription>
+          Study these Georgian words before taking the quiz
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-3">
+          {weeklyWords.map((word) => (
+            <div key={word.id} className="flex items-center justify-between p-3 border rounded">
+              <Badge variant="secondary" className="text-lg font-medium">
+                {word.georgian}
+              </Badge>
+              <span className="text-muted-foreground">{word.english}</span>
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex gap-2 pt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => onNavigate('home')}
+          >
+            Back to Home
+          </Button>
+          <Button 
+            onClick={() => onNavigate('quiz')}
+            className="flex-1"
+          >
+            Start Quiz
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 5.7. QuizView Component (`src/components/QuizView.tsx`)
+
+```typescript
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { weeklyWords } from '../data/words';
+import { AppView, QuizState } from '../types/app';
+
+interface QuizViewProps {
+  quizState: QuizState;
+  setQuizState: (state: QuizState) => void;
+  onNavigate: (view: AppView) => void;
+}
+
+export default function QuizView({ quizState, setQuizState, onNavigate }: QuizViewProps) {
+  const currentWord = weeklyWords[quizState.currentQuestionIndex];
+  
+  // Generate multiple choice options
+  const generateOptions = () => {
+    const correctAnswer = currentWord.english;
+    const incorrectAnswers = weeklyWords
+      .filter(word => word.english !== correctAnswer)
+      .map(word => word.english)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3);
+    
+    return [correctAnswer, ...incorrectAnswers].sort(() => 0.5 - Math.random());
+  };
+
+  const options = generateOptions();
+  const progress = ((quizState.currentQuestionIndex + 1) / weeklyWords.length) * 100;
+
+  const handleAnswer = (selectedAnswer: string) => {
+    const isCorrect = selectedAnswer === currentWord.english;
+    
+    setQuizState({
+      ...quizState,
+      selectedAnswer,
+      showFeedback: true,
+      score: isCorrect ? quizState.score + 1 : quizState.score
+    });
+  };
+
+  const handleNext = () => {
+    if (quizState.currentQuestionIndex === weeklyWords.length - 1) {
+      onNavigate('results');
+    } else {
+      setQuizState({
+        ...quizState,
+        currentQuestionIndex: quizState.currentQuestionIndex + 1,
+        selectedAnswer: null,
+        showFeedback: false
+      });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Quiz Time!</CardTitle>
+        <CardDescription>
+          Question {quizState.currentQuestionIndex + 1} of {weeklyWords.length}
+        </CardDescription>
+        <Progress value={progress} className="w-full" />
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Current Score */}
+        <div className="text-center">
+          <Badge variant="outline">
+            Score: {quizState.score}/{weeklyWords.length}
+          </Badge>
+        </div>
+
+        {/* Georgian Word */}
+        <div className="text-center">
+          <Badge className="text-2xl p-4" variant="secondary">
+            {currentWord.georgian}
+          </Badge>
+        </div>
+
+        {/* Answer Options */}
+        {!quizState.showFeedback && (
+          <div className="space-y-2">
+            <p className="text-center text-muted-foreground">
+              Select the English translation:
+            </p>
+            {options.map((option, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="w-full"
+                onClick={() => handleAnswer(option)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {/* Feedback */}
+        {quizState.showFeedback && (
+          <div className="space-y-4">
+            {quizState.selectedAnswer === currentWord.english ? (
+              <Alert>
+                <AlertDescription>
+                  🎉 Congratulations! That's correct!
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Incorrect. The correct answer is: <strong>{currentWord.english}</strong>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex gap-2">
+              {quizState.selectedAnswer !== currentWord.english && (
+                <Button 
+                  variant="outline"
+                  onClick={() => onNavigate('learn')}
+                >
+                  Back to Learning
+                </Button>
+              )}
+              <Button 
+                onClick={handleNext}
+                className="flex-1"
+              >
+                {quizState.currentQuestionIndex === weeklyWords.length - 1 ? 'View Results' : 'Next Question'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 5.8. ResultsView Component (`src/components/ResultsView.tsx`)
+
+```typescript
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { AppView } from '../types/app';
+
+interface ResultsViewProps {
+  score: number;
+  total: number;
+  onNavigate: (view: AppView) => void;
+}
+
+export default function ResultsView({ score, total, onNavigate }: ResultsViewProps) {
+  const percentage = Math.round((score / total) * 100);
+  
+  const getScoreMessage = () => {
+    if (percentage >= 90) return "Outstanding! 🏆";
+    if (percentage >= 70) return "Well done! 👏";
+    if (percentage >= 50) return "Good effort! 👍";
+    return "Keep practicing! 💪";
+  };
+
+  return (
+    <div className="flex justify-center items-center min-h-[80vh]">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Quiz Complete!</CardTitle>
+          <CardDescription>
+            Here's how you performed
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center space-y-6">
+          <div className="space-y-2">
+            <Badge className="text-3xl p-6" variant="secondary">
+              {score}/{total}
+            </Badge>
+            <p className="text-xl text-muted-foreground">{percentage}%</p>
+            <p className="text-lg">{getScoreMessage()}</p>
+          </div>
+          
+          <p className="text-muted-foreground">
+            Well done! Come back next week to learn more words.
+          </p>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => onNavigate('learn')}
+            >
+              Review Words
+            </Button>
+            <Button 
+              onClick={() => onNavigate('home')}
+              className="flex-1"
+            >
+              Back to Home
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
 
 ## 6. No-Gos (Out of Scope for this 3-hour iteration)
 
 To stay within the 3-hour appetite, the following are explicitly out of scope:
 
-*   User accounts or login.
-*   Saving progress across sessions or devices.
-*   Dynamic loading of new word lists (words are hardcoded for this iteration).
-*   Complex animations or sophisticated UI design.
+*   User accounts or login systems.
+*   Persistent data storage (localStorage could be added later).
+*   Dynamic loading of new word lists (words are hardcoded in `words.ts`).
+*   Complex animations beyond basic Tailwind transitions.
 *   Spaced repetition algorithms or adaptive learning.
-*   Backend database or API integration.
-*   Support for multiple languages (UI is English, learning Georgian).
-*   Error handling beyond basic UI feedback.
+*   Backend API integration.
+*   Support for multiple languages in the UI.
+*   Advanced error boundaries or comprehensive error handling.
+*   Responsive mobile optimization beyond basic Tailwind classes.
+*   Audio pronunciation features.
 
 ## 7. Deliverables
 
 Within the 3-hour appetite, the junior developer should aim to produce:
 
-1.  `index.html`: The home page.
-2.  `learn.html`: The page for learning words.
-3.  `quiz.html`: The page for the quiz.
-4.  `style.css`: A single CSS file for basic styling of all pages.
-5.  JavaScript code (either embedded in HTML files or in a single `script.js` linked by all HTML files) to implement the described functionality.
+1.  **Updated `src/App.tsx`**: Main component with view routing logic.
+2.  **`src/data/words.ts`**: Georgian words data with TypeScript types.
+3.  **`src/types/app.ts`**: TypeScript type definitions for the app.
+4.  **`src/components/HomeView.tsx`**: Welcome screen component.
+5.  **`src/components/LearnView.tsx`**: Word learning display component.
+6.  **`src/components/QuizView.tsx`**: Interactive quiz component.
+7.  **`src/components/ResultsView.tsx`**: Final score display component.
 
-This plan provides a clear path to a functional MVP. The focus is on simplicity and achieving the core loop of learn -> quiz -> results.
+**Technical Foundation Already Complete:**
+- ✅ React + TypeScript + Vite setup
+- ✅ shadcn/ui component library installed and configured
+- ✅ Tailwind CSS styling system
+- ✅ Development environment ready
+
+This plan leverages the modern component library foundation while maintaining the simple core learning loop of **learn → quiz → results**. The focus remains on delivering the MVP functionality within the 3-hour constraint, but with a more polished and maintainable codebase.
