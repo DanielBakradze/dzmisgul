@@ -1,62 +1,62 @@
-# Georgian Learning App - Shape Up Documentation v.2.0
+# Georgian Learning App - Mobile-First Shape Up Documentation v.2.1
 
 ## 1. Problem Definition
 
-It's challenging for individuals, especially those with busy schedules ("normies"), to find dedicated time to learn the Georgian language. We need a simple, accessible way to facilitate learning a few words regularly.
+It's challenging for individuals, especially those with busy schedules ("normies"), to find dedicated time to learn the Georgian language. We need a simple, accessible **mobile web application** to facilitate learning a few words regularly, optimized for on-the-go usage.
 
 ## 2. Appetite
 
-**3 hours.** This is a strict timebox for the initial Minimum Viable Product (MVP).
+**3 hours.** This is a strict timebox for the initial Minimum Viable Product (MVP), designed exclusively for mobile screens.
 
 ## 3. Goal
 
-Help users learn at least **10 new Georgian words per week** through a simple, interactive web application.
+Help users learn at least **10 new Georgian words per week** through a simple, interactive **mobile web application**.
 
-## 4. Core Solution (Breadboarding)
+## 4. Core Solution (Breadboarding for Mobile)
 
-We will build a small, focused web application using React components and the shadcn/ui component library we've already set up. The application will guide the user through learning a set of words and then quizzing them using modern UI patterns.
+We will build a small, focused **mobile web application** using React components and the shadcn/ui component library. The application will guide the user through learning a set of words and then quizzing them, using UI patterns optimized for touch interaction and smaller viewports.
 
-**Component Flow:**
+**Component Flow (Mobile Screen Optimized):**
 
 1.  **Home View:**
-    *   Welcomes the user with a clean card-based layout.
-    *   A primary button: "Learn Today's Words".
-    *   Clicking this navigates to the "Learn Words" view.
+    *   Welcomes the user with a clean, full-width card layout suitable for mobile screens.
+    *   A prominent primary button: "Learn Today's Words".
+    *   Tapping this navigates to the "Learn Words" view.
 
 2.  **Learn Words View:**
-    *   Displays a list of 10 Georgian words alongside their English translations (this week's words) using Badge components.
-    *   A button: "Start Quiz".
-    *   Clicking this navigates to the "Quiz" view.
+    *   Displays a scrollable list of 10 Georgian words alongside their English translations using Badge components, designed for easy reading on mobile.
+    *   A button: "Start Quiz", easily accessible at the bottom of the screen or as a floating action button if appropriate for mobile UX.
+    *   Tapping this navigates to the "Quiz" view.
 
 3.  **Quiz View:**
-    *   Presents one Georgian word at a time from the list of 10 using Card components.
-    *   Offers 3-4 multiple-choice English translations using Button components.
+    *   Presents one Georgian word at a time using full-width Card components for clarity on mobile.
+    *   Offers 3-4 multiple-choice English translations using full-width Button components for easy tapping.
     *   User selects an answer.
-    *   **Feedback:**
-        *   **Correct Answer:** Displays success Alert component. Provides a button to proceed to the "Next Question".
-        *   **Incorrect Answer:** Displays error Alert component with correct answer. Provides buttons for "Back to Learning" and "Next Question".
-    *   Tracks the user's score using Progress component.
+    *   **Feedback (Mobile Alerts):**
+        *   **Correct Answer:** Displays a clear success Alert component. Provides a button to proceed to the "Next Question".
+        *   **Incorrect Answer:** Displays an error Alert component with the correct answer. Provides buttons for "Back to Learning" and "Next Question".
+    *   Tracks the user's score using a Progress component, clearly visible on the mobile screen.
     *   After 10 questions, displays the final score.
 
 4.  **Results View:**
-    *   Displays the final score using Card and Badge components.
+    *   Displays the final score using Card and Badge components, formatted for mobile readability.
     *   A message: "Well done! Come back next week to learn more words."
 
-## 5. Key Functionality (Step-by-Step for Implementation)
+## 5. Key Functionality (Step-by-Step for Mobile Implementation)
 
-This plan uses React with TypeScript, Vite, and the shadcn/ui component library that's already set up.
+This plan uses React with TypeScript, Vite, and the shadcn/ui component library, with a focus on a **mobile-only user interface**.
 
 ### 5.1. Project Structure
 
 The existing project structure is already set up with:
 *   React + TypeScript + Vite
 *   shadcn/ui components installed
-*   Tailwind CSS configured
+*   Tailwind CSS configured (to be used for mobile-specific styling)
 *   All necessary dependencies
 
 ### 5.2. Word Data (TypeScript)
 
-Create a new file `src/data/words.ts` to define the Georgian words:
+Create a new file `src/data/words.ts` to define the Georgian words (content remains the same):
 
 ```typescript
 export interface GeorgianWord {
@@ -81,7 +81,7 @@ export const weeklyWords: GeorgianWord[] = [
 
 ### 5.3. State Management
 
-Use React's built-in `useState` to manage application state. Create types in `src/types/app.ts`:
+Use React's built-in `useState` to manage application state. Create types in `src/types/app.ts` (content remains the same):
 
 ```typescript
 export type AppView = 'home' | 'learn' | 'quiz' | 'results';
@@ -97,7 +97,7 @@ export interface QuizState {
 
 ### 5.4. Main App Component Structure
 
-Update `src/App.tsx` to handle different views:
+Update `src/App.tsx` to handle different views, ensuring the layout is optimized for mobile screens:
 
 ```typescript
 import React, { useState } from 'react';
@@ -118,8 +118,9 @@ function App() {
   });
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background p-4 flex flex-col items-center">
+      {/* Ensure content is constrained for mobile, e.g., w-full max-w-sm or similar */}
+      <div className="w-full max-w-md">
         {currentView === 'home' && <HomeView onNavigate={setCurrentView} />}
         {currentView === 'learn' && <LearnView onNavigate={setCurrentView} />}
         {currentView === 'quiz' && (
@@ -144,6 +145,8 @@ function App() {
 
 ### 5.5. HomeView Component (`src/components/HomeView.tsx`)
 
+Optimized for a single-column mobile layout:
+
 ```typescript
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -156,8 +159,8 @@ interface HomeViewProps {
 
 export default function HomeView({ onNavigate }: HomeViewProps) {
   return (
-    <div className="flex justify-center items-center min-h-[80vh]">
-      <Card className="w-full max-w-md">
+    <div className="flex justify-center items-center min-h-[calc(100vh-8rem)]"> {/* Adjust height for mobile viewport */}
+      <Card className="w-full"> {/* Full width for mobile */}
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Learn Georgian! 🇬🇪</CardTitle>
           <CardDescription>
@@ -168,7 +171,7 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
           <Button 
             onClick={() => onNavigate('learn')}
             size="lg"
-            className="w-full"
+            className="w-full" /* Full width button for mobile */
           >
             Learn Today's Words
           </Button>
@@ -180,6 +183,8 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
 ```
 
 ### 5.6. LearnView Component (`src/components/LearnView.tsx`)
+
+Designed for a scrollable list on mobile:
 
 ```typescript
 import React from 'react';
@@ -195,7 +200,7 @@ interface LearnViewProps {
 
 export default function LearnView({ onNavigate }: LearnViewProps) {
   return (
-    <Card>
+    <Card className="w-full"> {/* Full width for mobile */}
       <CardHeader>
         <CardTitle>Today's 10 Words</CardTitle>
         <CardDescription>
@@ -209,21 +214,22 @@ export default function LearnView({ onNavigate }: LearnViewProps) {
               <Badge variant="secondary" className="text-lg font-medium">
                 {word.georgian}
               </Badge>
-              <span className="text-muted-foreground">{word.english}</span>
+              <span className="text-muted-foreground text-right">{word.english}</span>
             </div>
           ))}
         </div>
         
-        <div className="flex gap-2 pt-4">
+        <div className="flex flex-col sm:flex-row gap-2 pt-4"> {/* Stack buttons vertically on small screens */}
           <Button 
             variant="outline" 
             onClick={() => onNavigate('home')}
+            className="w-full"
           >
             Back to Home
           </Button>
           <Button 
             onClick={() => onNavigate('quiz')}
-            className="flex-1"
+            className="w-full"
           >
             Start Quiz
           </Button>
@@ -235,6 +241,8 @@ export default function LearnView({ onNavigate }: LearnViewProps) {
 ```
 
 ### 5.7. QuizView Component (`src/components/QuizView.tsx`)
+
+Optimized for touch targets and mobile readability:
 
 ```typescript
 import React from 'react';
@@ -255,7 +263,6 @@ interface QuizViewProps {
 export default function QuizView({ quizState, setQuizState, onNavigate }: QuizViewProps) {
   const currentWord = weeklyWords[quizState.currentQuestionIndex];
   
-  // Generate multiple choice options
   const generateOptions = () => {
     const correctAnswer = currentWord.english;
     const incorrectAnswers = weeklyWords
@@ -295,7 +302,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
   };
 
   return (
-    <Card>
+    <Card className="w-full"> {/* Full width for mobile */}
       <CardHeader>
         <CardTitle>Quiz Time!</CardTitle>
         <CardDescription>
@@ -304,21 +311,18 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
         <Progress value={progress} className="w-full" />
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Current Score */}
         <div className="text-center">
           <Badge variant="outline">
             Score: {quizState.score}/{weeklyWords.length}
           </Badge>
         </div>
 
-        {/* Georgian Word */}
         <div className="text-center">
           <Badge className="text-2xl p-4" variant="secondary">
             {currentWord.georgian}
           </Badge>
         </div>
 
-        {/* Answer Options */}
         {!quizState.showFeedback && (
           <div className="space-y-2">
             <p className="text-center text-muted-foreground">
@@ -328,7 +332,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
               <Button
                 key={index}
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 text-base" /* Larger touch targets for mobile */
                 onClick={() => handleAnswer(option)}
               >
                 {option}
@@ -337,35 +341,35 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
           </div>
         )}
 
-        {/* Feedback */}
         {quizState.showFeedback && (
           <div className="space-y-4">
             {quizState.selectedAnswer === currentWord.english ? (
               <Alert>
-                <AlertDescription>
+                <AlertDescription className="text-center">
                   🎉 Congratulations! That's correct!
                 </AlertDescription>
               </Alert>
             ) : (
               <Alert variant="destructive">
-                <AlertDescription>
+                <AlertDescription className="text-center">
                   Incorrect. The correct answer is: <strong>{currentWord.english}</strong>
                 </AlertDescription>
               </Alert>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2"> {/* Stack buttons on small screens */}
               {quizState.selectedAnswer !== currentWord.english && (
                 <Button 
                   variant="outline"
                   onClick={() => onNavigate('learn')}
+                  className="w-full"
                 >
                   Back to Learning
                 </Button>
               )}
               <Button 
                 onClick={handleNext}
-                className="flex-1"
+                className="w-full"
               >
                 {quizState.currentQuestionIndex === weeklyWords.length - 1 ? 'View Results' : 'Next Question'}
               </Button>
@@ -379,6 +383,8 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
 ```
 
 ### 5.8. ResultsView Component (`src/components/ResultsView.tsx`)
+
+Formatted for clear display on mobile:
 
 ```typescript
 import React from 'react';
@@ -404,8 +410,8 @@ export default function ResultsView({ score, total, onNavigate }: ResultsViewPro
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh]">
-      <Card className="w-full max-w-md">
+    <div className="flex justify-center items-center min-h-[calc(100vh-8rem)]"> {/* Adjust height */}
+      <Card className="w-full"> {/* Full width for mobile */}
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Quiz Complete!</CardTitle>
           <CardDescription>
@@ -425,16 +431,17 @@ export default function ResultsView({ score, total, onNavigate }: ResultsViewPro
             Well done! Come back next week to learn more words.
           </p>
           
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2"> {/* Stack buttons on small screens */}
             <Button 
               variant="outline"
               onClick={() => onNavigate('learn')}
+              className="w-full"
             >
               Review Words
             </Button>
             <Button 
               onClick={() => onNavigate('home')}
-              className="flex-1"
+              className="w-full"
             >
               Back to Home
             </Button>
@@ -448,35 +455,35 @@ export default function ResultsView({ score, total, onNavigate }: ResultsViewPro
 
 ## 6. No-Gos (Out of Scope for this 3-hour iteration)
 
-To stay within the 3-hour appetite, the following are explicitly out of scope:
+To stay within the 3-hour appetite and maintain a **mobile-only focus**, the following are explicitly out of scope:
 
 *   User accounts or login systems.
 *   Persistent data storage (localStorage could be added later).
 *   Dynamic loading of new word lists (words are hardcoded in `words.ts`).
-*   Complex animations beyond basic Tailwind transitions.
+*   Complex animations beyond basic Tailwind transitions suitable for mobile.
 *   Spaced repetition algorithms or adaptive learning.
 *   Backend API integration.
 *   Support for multiple languages in the UI.
 *   Advanced error boundaries or comprehensive error handling.
-*   Responsive mobile optimization beyond basic Tailwind classes.
+*   **Support for tablet or desktop screen resolutions.** The application is designed and optimized exclusively for mobile screens.
 *   Audio pronunciation features.
 
 ## 7. Deliverables
 
-Within the 3-hour appetite, the junior developer should aim to produce:
+Within the 3-hour appetite, the junior developer should aim to produce a **mobile-optimized web application** with:
 
-1.  **Updated `src/App.tsx`**: Main component with view routing logic.
+1.  **Updated `src/App.tsx`**: Main component with view routing logic, styled for mobile.
 2.  **`src/data/words.ts`**: Georgian words data with TypeScript types.
 3.  **`src/types/app.ts`**: TypeScript type definitions for the app.
-4.  **`src/components/HomeView.tsx`**: Welcome screen component.
-5.  **`src/components/LearnView.tsx`**: Word learning display component.
-6.  **`src/components/QuizView.tsx`**: Interactive quiz component.
-7.  **`src/components/ResultsView.tsx`**: Final score display component.
+4.  **`src/components/HomeView.tsx`**: Welcome screen component, mobile-optimized.
+5.  **`src/components/LearnView.tsx`**: Word learning display component, mobile-optimized.
+6.  **`src/components/QuizView.tsx`**: Interactive quiz component, mobile-optimized.
+7.  **`src/components/ResultsView.tsx`**: Final score display component, mobile-optimized.
 
 **Technical Foundation Already Complete:**
 - ✅ React + TypeScript + Vite setup
 - ✅ shadcn/ui component library installed and configured
-- ✅ Tailwind CSS styling system
+- ✅ Tailwind CSS styling system (to be used for mobile-specific styling)
 - ✅ Development environment ready
 
-This plan leverages the modern component library foundation while maintaining the simple core learning loop of **learn → quiz → results**. The focus remains on delivering the MVP functionality within the 3-hour constraint, but with a more polished and maintainable codebase.
+This plan leverages the modern component library foundation while maintaining the simple core learning loop of **learn → quiz → results**, specifically tailored for an excellent **mobile user experience**. The focus remains on delivering the MVP functionality within the 3-hour constraint, with a polished and maintainable codebase for a mobile-only application.
