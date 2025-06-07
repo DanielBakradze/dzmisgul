@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { weeklyWords } from '../data/words';
+import { dailyWords } from '../data/words';
 import { AppView, QuizState } from '../types/app';
 
 interface QuizViewProps {
@@ -14,11 +14,15 @@ interface QuizViewProps {
 }
 
 export default function QuizView({ quizState, setQuizState, onNavigate }: QuizViewProps) {
-  const currentWord = weeklyWords[quizState.currentQuestionIndex];
+  // For now, let's assume we are always on Day 1 for the quiz
+  // This can be made dynamic later if we introduce day selection
+  const currentDayWords = dailyWords[0] || [];
+  const currentWord = currentDayWords[quizState.currentQuestionIndex];
   
   const generateOptions = () => {
+    if (!currentWord) return []; // Handle case where currentWord might be undefined
     const correctAnswer = currentWord.english;
-    const incorrectAnswers = weeklyWords
+    const incorrectAnswers = currentDayWords
       .filter(word => word.english !== correctAnswer)
       .map(word => word.english)
       .sort(() => 0.5 - Math.random())
@@ -28,7 +32,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
   };
 
   const options = generateOptions();
-  const progress = ((quizState.currentQuestionIndex + 1) / weeklyWords.length) * 100;
+  const progress = ((quizState.currentQuestionIndex + 1) / currentDayWords.length) * 100;
 
   const handleAnswer = (selectedAnswer: string) => {
     const isCorrect = selectedAnswer === currentWord.english;
@@ -42,7 +46,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
   };
 
   const handleNext = () => {
-    if (quizState.currentQuestionIndex === weeklyWords.length - 1) {
+    if (quizState.currentQuestionIndex === currentDayWords.length - 1) {
       onNavigate('results');
     } else {
       setQuizState({
@@ -59,14 +63,14 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
       <CardHeader>
         <CardTitle>Quiz Time!</CardTitle>
         <CardDescription>
-          Question {quizState.currentQuestionIndex + 1} of {weeklyWords.length}
+          Question {quizState.currentQuestionIndex + 1} of {currentDayWords.length}
         </CardDescription>
         <Progress value={progress} className="w-full" />
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center">
           <Badge variant="outline">
-            Score: {quizState.score}/{weeklyWords.length}
+            Score: {quizState.score}/{currentDayWords.length}
           </Badge>
         </div>
 
@@ -124,7 +128,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
                 onClick={handleNext}
                 className="w-full"
               >
-                {quizState.currentQuestionIndex === weeklyWords.length - 1 ? 'View Results' : 'Next Question'}
+                {quizState.currentQuestionIndex === currentDayWords.length - 1 ? 'View Results' : 'Next Question'}
               </Button>
             </div>
           </div>
