@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { weeklyWords } from '../data/words';
+import { dailyWords } from '../data/words';
 import { AppView } from '../types/app';
 
 interface LearnViewProps {
@@ -10,17 +10,21 @@ interface LearnViewProps {
 }
 
 export default function LearnView({ onNavigate }: LearnViewProps) {
+  // For now, let's assume we are always on Day 1 for learning
+  // This can be made dynamic later if we introduce day selection
+  const currentDayWords = dailyWords[0] || [];
+
   return (
     <Card className="w-full"> {/* Full width for mobile */}
       <CardHeader>
-        <CardTitle>Today's 10 Words</CardTitle>
+        <CardTitle>Day 1 Words</CardTitle>
         <CardDescription>
           Study these Georgian words before taking the quiz
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3">
-          {weeklyWords.map((word) => (
+          {currentDayWords.map((word) => (
             <div key={word.id} className="flex items-center justify-between p-3 border rounded">
               <Badge variant="secondary" className="text-lg font-medium">
                 {word.georgian}

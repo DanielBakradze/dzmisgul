@@ -31,7 +31,7 @@ function App() {
         {currentView === 'results' && (
           <ResultsView 
             score={quizState.score}
-            total={10} /* Assuming 10 words for Day 1. This should be dynamic if day selection is added. */
+            total={10} /* Assuming 10 words as per weeklyWords */
             onNavigate={setCurrentView}
           />
         )}
