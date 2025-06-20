@@ -1,29 +1,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { dailyWords } from '../data/words';
-import { AppView } from '../types/app';
+import { AppView, GeorgianWord } from '../types/app';
 
 interface LearnViewProps {
+  wordsForCurrentDay: GeorgianWord[];
+  currentDay: number;
   onNavigate: (view: AppView) => void;
 }
 
-export default function LearnView({ onNavigate }: LearnViewProps) {
-  // For now, let's assume we are always on Day 1 for learning
-  // This can be made dynamic later if we introduce day selection
-  const currentDayWords = dailyWords[0] || [];
-
+export default function LearnView({ wordsForCurrentDay, currentDay, onNavigate }: LearnViewProps) {
   return (
     <Card className="w-full"> {/* Full width for mobile */}
       <CardHeader>
-        <CardTitle>Day 1 Words</CardTitle>
+        <CardTitle>Day {currentDay} Words</CardTitle>
         <CardDescription>
           Study these Georgian words before taking the quiz
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3">
-          {currentDayWords.map((word) => (
+          {wordsForCurrentDay.map((word) => (
             <div key={word.id} className="flex items-center justify-between p-3 border rounded">
               <Badge variant="secondary" className="text-lg font-medium">
                 {word.georgian}

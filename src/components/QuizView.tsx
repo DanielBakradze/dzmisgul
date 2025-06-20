@@ -3,25 +3,22 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { dailyWords } from '../data/words';
-import { AppView, QuizState } from '../types/app';
+import { AppView, QuizState, GeorgianWord } from '../types/app';
 
 interface QuizViewProps {
+  wordsForCurrentDay: GeorgianWord[];
   quizState: QuizState;
   setQuizState: (state: QuizState) => void;
   onNavigate: (view: AppView) => void;
 }
 
-export default function QuizView({ quizState, setQuizState, onNavigate }: QuizViewProps) {
-  // For now, let's assume we are always on Day 1 for the quiz
-  // This can be made dynamic later if we introduce day selection
-  const currentDayWords = dailyWords[0] || [];
-  const currentWord = currentDayWords[quizState.currentQuestionIndex];
+export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, onNavigate }: QuizViewProps) {
+  const currentWord = wordsForCurrentDay[quizState.currentQuestionIndex];
   
   const generateOptions = () => {
     if (!currentWord) return []; // Handle case where currentWord might be undefined
     const correctAnswer = currentWord.english;
-    const incorrectAnswers = currentDayWords
+    const incorrectAnswers = wordsForCurrentDay
       .filter(word => word.english !== correctAnswer)
       .map(word => word.english)
       .sort(() => 0.5 - Math.random())
@@ -31,7 +28,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
   };
 
   const options = generateOptions();
-  const progress = ((quizState.currentQuestionIndex + 1) / currentDayWords.length) * 100;
+  const progress = ((quizState.currentQuestionIndex + 1) / wordsForCurrentDay.length) * 100;
 
   const handleAnswer = (selectedAnswer: string) => {
     const isCorrect = selectedAnswer === currentWord.english;
@@ -45,7 +42,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
   };
 
   const handleNext = () => {
-    if (quizState.currentQuestionIndex === currentDayWords.length - 1) {
+    if (quizState.currentQuestionIndex === wordsForCurrentDay.length - 1) {
       onNavigate('results');
     } else {
       setQuizState({
@@ -57,19 +54,32 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
     }
   };
 
+  if (!currentWord) {
+    return (
+      <Card className="w-full">
+        <CardContent className="text-center p-6">
+          <p>No words available for quiz.</p>
+          <Button onClick={() => onNavigate('home')} className="mt-4">
+            Back to Home
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full"> {/* Full width for mobile */}
       <CardHeader>
         <CardTitle>Quiz Time!</CardTitle>
         <CardDescription>
-          Question {quizState.currentQuestionIndex + 1} of {currentDayWords.length}
+          Question {quizState.currentQuestionIndex + 1} of {wordsForCurrentDay.length}
         </CardDescription>
         <Progress value={progress} className="w-full" />
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center">
           <Badge variant="outline">
-            Score: {quizState.score}/{currentDayWords.length}
+            Score: {quizState.score}/{wordsForCurrentDay.length}
           </Badge>
         </div>
 
@@ -127,7 +137,7 @@ export default function QuizView({ quizState, setQuizState, onNavigate }: QuizVi
                 onClick={handleNext}
                 className="w-full"
               >
-                {quizState.currentQuestionIndex === currentDayWords.length - 1 ? 'View Results' : 'Next Question'}
+                {quizState.currentQuestionIndex === wordsForCurrentDay.length - 1 ? 'View Results' : 'Next Question'}
               </Button>
             </div>
           </div>

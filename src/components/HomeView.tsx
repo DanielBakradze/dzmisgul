@@ -4,9 +4,10 @@ import { AppView } from '../types/app';
 
 interface HomeViewProps {
   onNavigate: (view: AppView) => void;
+  onStartCycle: () => void;
 }
 
-export default function HomeView({ onNavigate }: HomeViewProps) {
+export default function HomeView({ onNavigate, onStartCycle }: HomeViewProps) {
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-8rem)]"> {/* Adjust height for mobile viewport */}
       <Card className="w-full"> {/* Full width for mobile */}
@@ -18,11 +19,11 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
         </CardHeader>
         <CardContent className="text-center">
           <Button 
-            onClick={() => onNavigate('learn')}
+            onClick={onStartCycle}
             size="lg"
             className="w-full" /* Full width button for mobile */
           >
-            Learn Today's Words
+            Start Learning Cycle
           </Button>
         </CardContent>
       </Card>
