@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppView, QuizState } from './types/app';
 import HomeView from './components/HomeView';
 import LearnView from './components/LearnView';

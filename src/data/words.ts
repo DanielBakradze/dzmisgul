@@ -44,7 +44,7 @@ export const allWords: GeorgianWord[] = [
   { id: 27, georgian: "ვაკეთებ", english: "I do" },
   { id: 28, georgian: "ვშრომობ", english: "I work" },
   { id: 29, georgian: "ვესაუბრე", english: "I speak" },
-  { id: 30, georgian: "მივწერე", english: "I write" }
+  { id: 30, georgian: "მივწერე", english: "I write" },
   
   // Food and drinks
   { id: 31, georgian: "წყალი", english: "Water" },
