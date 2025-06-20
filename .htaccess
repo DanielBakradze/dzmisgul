@@ -1,2 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # If the request is not for a file/directory within the "dist" subdirectory itself
+  RewriteCond %{REQUEST_URI} !^/dist/
+
+  # Rewrite the request to be served from the "dist" subdirectory
+  # For example, a request for /example.html becomes a request for /dist/example.html
+  # A request for /assets/main.js becomes a request for /dist/assets/main.js
+  RewriteRule ^(.*)$ /dist/$1 [L]
+</IfModule>
+
+# Ensure correct MIME types are set for JavaScript files
 AddType application/javascript .js
 AddType application/javascript .mjs
