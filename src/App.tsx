@@ -57,13 +57,14 @@ function App() {
   };
 
   // This function will be expanded in future milestones
-  const prepareWordsForDay = (day: number) => {
-    if (day === 1) {
-      // Day 1 logic is handled in startNewLearningCycle for now
-      return;
-    }
-    // Additional day logic will be implemented in future milestones
-  };
+  // Currently unused but will be needed for Milestone 2+
+  // const prepareWordsForDay = (day: number) => {
+  //   if (day === 1) {
+  //     // Day 1 logic is handled in startNewLearningCycle for now
+  //     return;
+  //   }
+  //   // Additional day logic will be implemented in future milestones
+  // };
 
   return (
     <div className="min-h-screen bg-background p-4 flex flex-col items-center">

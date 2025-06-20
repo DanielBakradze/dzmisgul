@@ -7,7 +7,7 @@ interface HomeViewProps {
   onStartCycle: () => void;
 }
 
-export default function HomeView({ onNavigate, onStartCycle }: HomeViewProps) {
+export default function HomeView({ onStartCycle }: HomeViewProps) {
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-8rem)]"> {/* Adjust height for mobile viewport */}
       <Card className="w-full"> {/* Full width for mobile */}
