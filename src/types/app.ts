@@ -2,6 +2,7 @@ export interface GeorgianWord {
   id: number;
   georgian: string;
   english: string;
+  transcription?: string;
 }
 
 export type AppView = 'home' | 'learn' | 'quiz' | 'results' | 'cycle_stats';

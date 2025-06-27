@@ -22,9 +22,12 @@ export default function LearnView({ wordsForCurrentDay, currentDay, onNavigate }
         <div className="grid gap-3">
           {wordsForCurrentDay.map((word) => (
             <div key={word.id} className="flex items-center justify-between p-3 border rounded">
-              <Badge variant="secondary" className="text-lg font-medium">
-                {word.georgian}
-              </Badge>
+              <div>
+                <Badge variant="secondary" className="text-lg font-medium">
+                  {word.georgian}
+                </Badge>
+                <p className="text-sm text-muted-foreground">{word.transcription}</p>
+              </div>
               <span className="text-muted-foreground text-right">{word.english}</span>
             </div>
           ))}

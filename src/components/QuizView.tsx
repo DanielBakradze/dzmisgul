@@ -87,6 +87,7 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
           <Badge className="text-2xl p-4" variant="secondary">
             {currentWord.georgian}
           </Badge>
+          <p className="text-sm text-muted-foreground">{currentWord.transcription}</p>
         </div>
 
         {!quizState.showFeedback && (
