@@ -101,7 +101,8 @@ We will modify the existing React component structure and state management (`App
 *   **Home View:** Button to "Start Learning Cycle" (calls `startNewLearningCycle` and navigates to 'learn').
 *   **Learn View:** Displays words from `wordsForCurrentDay`. Button "Start Quiz" navigates to 'quiz'.
 *   **Quiz View:** Uses `wordsForCurrentDay`. After quiz, calls `processQuizResults` and then `advanceToNextDay`. If `currentCycleDay` becomes 8 (after advancing), navigate to 'results'. Otherwise, navigate to 'learn' for the next day's words.
-*   **Results View (End of Cycle - Day 8):** Displays statistics: `wordsToLearnThisCycle` (all words encountered) and `incorrectlyAnsweredThisCycle` (words the user ultimately struggled with in the cycle). Button to "Start New Cycle".
+*   **Results View:** Displays the score for the most recently completed quiz.
+*   **Cycle Stats View (End of Cycle - Day 8):** Displays statistics: `wordsToLearnThisCycle` (all words encountered) and `incorrectlyAnsweredThisCycle` (words the user ultimately struggled with in the cycle). Button to "Start New Cycle".
 
 ## 6. Key Functionality (Step-by-Step Implementation)
 
@@ -117,37 +118,43 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
     *   Wireframe the navigation flow between the Learn View, the different Quiz Views, and the end-of-cycle summary.
 3.  **Deliverable:** A set of simple wireframes or a clickable prototype (using a tool like Figma or just component placeholders in the code) that validates the user journey for a single 10-word cycle. This milestone ensures the technical implementation has a clear visual guide.
 
-### Milestone 1: Foundational State and Day 1 Logic ✅ COMPLETED
+### Milestone 1: Foundational State and Day 1 Logic
 
 1.  **Update `src/types/app.ts`:**
-    *   Add the new state interfaces/types:
+    *   Update the core data structures to track mastery for different quiz types.
         ```typescript
         export interface GeorgianWord {
           id: number;
           georgian: string;
           english: string;
+          transcription?: string;
         }
 
-        export type AppView = 'home' | 'learn' | 'quiz' | 'results' | 'cycle_stats'; // Add 'cycle_stats'
+        export type AppView = 'home' | 'learn' | 'quiz' | 'results' | 'cycle_stats';
 
-        export interface QuizState { // Existing, may need minor review later
-          currentQuestionIndex: number;
-          score: number;
-          selectedAnswer: string | null;
-          showFeedback: boolean;
-          quizCompleted: boolean;
+        // Defines the mastery status of a word across different quiz types.
+        export interface WordMastery {
+          standard: boolean; // Corresponds to standard multiple-choice quiz
+          textField: boolean; // Corresponds to text input quiz
+          reversed: boolean; // Corresponds to reversed (English-to-Georgian) quiz
+        }
+
+        // Represents a word within the context of a learning cycle, including its mastery status.
+        export interface CycleWord extends GeorgianWord {
+          mastery: WordMastery;
         }
 
         export interface LearningCycleState {
           currentCycleDay: number;
-          wordsForCurrentDay: GeorgianWord[];
-          wordsToLearnThisCycle: GeorgianWord[]; // All unique words shown in this cycle
-          incorrectlyAnsweredLastQuiz: GeorgianWord[]; // Words answered incorrectly in the *most recent* quiz
-          wordsToRepeatNextDay: GeorgianWord[]; // Specifically, words from incorrectlyAnsweredLastQuiz to carry over
-          masteredWordsThisCycle: GeorgianWord[]; // Words answered correctly at some point in the cycle
-          availableNewWords: GeorgianWord[]; // Pool of words not yet seen in this cycle
+          wordsForCurrentDay: CycleWord[];
+          wordsToLearnThisCycle: CycleWord[];
+          incorrectlyAnsweredLastQuiz: CycleWord[];
+          wordsToRepeatNextDay: CycleWord[];
+          masteredWordsThisCycle: CycleWord[]; // Words answered correctly at least once in the cycle
+          availableNewWords: GeorgianWord[]; // Words not yet introduced in the cycle
         }
         ```
+    *   **Note on Quiz Types:** While the data structure supports three quiz types, Milestone 1 will focus on implementing only the **standard quiz**. The functionality to select and process different quiz types will be addressed in a subsequent milestone.
 
 2.  **Update `src/data/words.ts`:**
     *   Ensure `allWords` is comprehensive. The existing `dailyWords` export might become obsolete or repurposed. For now, we'll primarily use `allWords`.
@@ -181,7 +188,7 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
 
 6.  **Modify `src/components/QuizView.tsx`:**
     *   Receive `wordsForCurrentDay` for the quiz.
-    *   Temporarily, after the quiz, navigate back to 'home' or a placeholder. Full quiz processing and day advancement will be in Milestone 2.
+    *   After the quiz, it will call a function to process results. For this milestone, it can simply navigate back to the home screen.
 
 7.  **Testing Milestone 1:**
     *   Clicking "Start Learning Cycle" on Home screen should:
@@ -255,28 +262,26 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
     *   Verify this continues for Day 4 through Day 7.
     *   Throughout Days 2-7, `incorrectlyAnsweredLastQuiz` should still update after each quiz.
 
-### Milestone 5: Day 8 Statistics, Cycle Reset, and New View
+### Milestone 5: Day 8 Statistics & Cycle Reset
 
 1.  **Create `src/components/CycleStatsView.tsx`:**
-    *   A new component to display end-of-cycle statistics.
-    *   Props: `wordsLearnedInCycle: GeorgianWord[]`, `wordsStruggledWithInCycle: GeorgianWord[]`, `onStartNewCycle: () => void`.
-    *   Layout:
-        *   Title: "Cycle Complete!"
-        *   Section: "Words Encountered This Cycle" (lists `wordsLearnedInCycle`).
-        *   Section: "Words You Struggled With" (lists `wordsStruggledWithInCycle` - these would be words that were still in `incorrectlyAnsweredLastQuiz` after the Day 7 quiz, or a cumulative list of all words ever marked incorrect in the cycle). *Decision: Let's define "Struggled With" as words that were marked incorrect in the Day 7 quiz, reflecting the final state of practice on that set.*
-        *   Button: "Start New Cycle" (calls `onStartNewCycle`).
+    *   This new component is dedicated to displaying end-of-cycle statistics.
+    *   **Props:**
+        *   `wordsLearnedInCycle: GeorgianWord[]`: All unique words presented during the cycle.
+        *   `wordsStruggledWithInCycle: GeorgianWord[]`: Words the user answered incorrectly in the final (Day 7) quiz.
+        *   `onStartNewCycle: () => void`: A function to be called by the "Start New Cycle" button.
+    *   **Layout:**
+        *   A clear title, e.g., "Cycle Complete!".
+        *   A section listing all words encountered during the cycle (`wordsLearnedInCycle`).
+        *   A section highlighting the words the user struggled with most recently (`wordsStruggledWithInCycle`).
+        *   A prominent "Start New Cycle" button.
 
-2.  **Update `src/App.tsx` - Day 8 Logic and Stats:**
-    *   Modify `advanceToNextDay()`:
-        *   If `currentCycleDay` increments to 8:
-            *   Do not call `prepareWordsForDay(8)`.
-            *   Navigate to the new 'cycle_stats' view.
-    *   The `startNewLearningCycle` function will already handle resetting for a new cycle.
-    *   Pass `learningCycleState.wordsToLearnThisCycle` (as `wordsLearnedInCycle`) and the final `learningCycleState.incorrectlyAnsweredLastQuiz` (from Day 7's quiz, as `wordsStruggledWithInCycle`) to `CycleStatsView`.
-    *   Pass `startNewLearningCycle` as `onStartNewCycle` to `CycleStatsView`.
-
-3.  **Update `src/App.tsx` - View Rendering:**
-    *   Add a case for `currentView === 'cycle_stats'` to render `CycleStatsView`.
+2.  **Update `src/App.tsx` for Day 8 and View Rendering:**
+    *   **Modify `advanceToNextDay()`:**
+        *   When `currentCycleDay` is incremented to 8, the function should set `currentView` to `'cycle_stats'` instead of calling `prepareWordsForDay(8)`.
+    *   **Update View Rendering Logic:**
+        *   In the main render function of `App.tsx`, add a condition to render the new `CycleStatsView` component when `currentView === 'cycle_stats'`.
+        *   Pass the required props to `CycleStatsView`: `learningCycleState.wordsToLearnThisCycle` (as `wordsLearnedInCycle`), the final `learningCycleState.incorrectlyAnsweredLastQuiz` (as `wordsStruggledWithInCycle`), and the `startNewLearningCycle` function (`onStartNewCycle`).
 
 4.  **Testing Milestone 5:**
     *   Complete a full 7-day cycle.

@@ -3,16 +3,24 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { AppView, QuizState, GeorgianWord } from '../types/app';
+import { AppView, QuizState, GeorgianWord, CycleWord } from '../types/app';
+import { useState } from 'react';
+
+interface AnsweredWord {
+  word: CycleWord;
+  correct: boolean;
+}
 
 interface QuizViewProps {
-  wordsForCurrentDay: GeorgianWord[];
+  wordsForCurrentDay: CycleWord[];
   quizState: QuizState;
   setQuizState: (state: QuizState) => void;
   onNavigate: (view: AppView) => void;
+  onQuizComplete: (answeredWords: AnsweredWord[]) => void;
 }
 
-export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, onNavigate }: QuizViewProps) {
+export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, onNavigate, onQuizComplete }: QuizViewProps) {
+  const [answeredWords, setAnsweredWords] = useState<AnsweredWord[]>([]);
   const currentWord = wordsForCurrentDay[quizState.currentQuestionIndex];
   
   const generateOptions = () => {
@@ -33,6 +41,8 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
   const handleAnswer = (selectedAnswer: string) => {
     const isCorrect = selectedAnswer === currentWord.english;
     
+    setAnsweredWords([...answeredWords, { word: currentWord, correct: isCorrect }]);
+
     setQuizState({
       ...quizState,
       selectedAnswer,
@@ -43,7 +53,7 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
 
   const handleNext = () => {
     if (quizState.currentQuestionIndex === wordsForCurrentDay.length - 1) {
-      onNavigate('results');
+      onQuizComplete([...answeredWords, { word: currentWord, correct: quizState.selectedAnswer === currentWord.english }]);
     } else {
       setQuizState({
         ...quizState,
