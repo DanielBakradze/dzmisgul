@@ -224,70 +224,45 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
     *   Verify `masteredWordsThisCycle` is updated.
     *   Verify the app transitions correctly (e.g., to Learn View for Day 2, or a placeholder if Day 2 logic isn't built yet).
 
-### Milestone 3: Day 2 Logic (New + Repeated Words)
+### Milestone 3: Dynamic Word Introduction (Days 2-7)
 
-1.  **Update `src/App.tsx` - `prepareWordsForDay` for Day 2:**
-    *   Modify `prepareWordsForDay(day)`:
-        *   **Add Day 2 logic (and similar for Day 3-7 if they follow the "X new + Y repeat" pattern):**
-            *   Get words from `learningCycleState.wordsToRepeatNextDay` (these are the ones marked from the previous day's quiz).
-            *   Let `numToRepeat = wordsToRepeatNextDay.length`.
-            *   Let `numNewWords = 10 - numToRepeat`.
-            *   Select `numNewWords` from `learningCycleState.availableNewWords`.
-            *   Combine `wordsToRepeatNextDay` and these new words. Shuffle them to mix. This is the new `wordsForCurrentDay`.
-            *   Add the new words to `wordsToLearnThisCycle`.
-            *   Update `availableNewWords`.
-            *   Clear `wordsToRepeatNextDay` as they've now been scheduled.
+1.  **Update `src/App.tsx` - Consolidate Logic in `advanceToNextDay()`:**
+    *   The `prepareWordsForDay` function will be removed. Its logic is now integrated directly into `advanceToNextDay` for a cleaner flow.
+    *   After processing quiz results, `advanceToNextDay` will:
+        *   Determine the number of words answered incorrectly in the last quiz.
+        *   Calculate how many new words are needed to bring the next day's set to 10.
+        *   Take the incorrectly answered words.
+        *   Take the required number of new words from `availableNewWords`.
+        *   Combine, shuffle, and set this as the `wordsForCurrentDay` for the next day.
+        *   Update `wordsToLearnThisCycle` and `availableNewWords` accordingly.
 
 2.  **Testing Milestone 3:**
-    *   Start a new cycle (Day 1). Get (e.g.) 3 words wrong in the quiz.
-    *   The app should advance to Day 2 Learn View.
-    *   The Learn View for Day 2 should display 10 words: the 3 words you got wrong on Day 1, plus 7 new random words. The order should be mixed.
-    *   `wordsToLearnThisCycle` should now contain the initial 10 from Day 1 plus the 7 new ones from Day 2.
+    *   Start a new cycle (Day 1). Get 3 words wrong.
+    *   After the quiz, the app advances to Day 2.
+    *   The Learn View for Day 2 should show 10 words: the 3 you got wrong, plus 7 new words.
+    *   Get 1 word wrong in the Day 2 quiz.
+    *   The Learn View for Day 3 should show 10 words: the 1 you got wrong, plus 9 new words.
 
-### Milestone 4: Day 3-7 Logic (Repeat Previous Day's Set)
+### Milestone 4: End of Cycle Statistics (Day 7)
 
-1.  **Update `src/App.tsx` - `prepareWordsForDay` for Day 3-7:**
-    *   Modify `prepareWordsForDay(day)`:
-        *   Add logic for `currentCycleDay` 3 through 7:
-            *   The `wordsForCurrentDay` should be *the same set of 10 words that were presented on the immediately preceding day*.
-            *   This means after a Day 2 quiz, `processQuizResults` will still identify incorrect words and set them in `wordsToRepeatNextDay`.
-            *   However, for preparing Day 3's words, `prepareWordsForDay` will *not* fetch new words. It will simply reuse Day 2's `wordsForCurrentDay`.
-            *   The flowchart states "Same logic as before" for Day 3-7. This implies the *quiz and feedback mechanism* is the same, but the set of words being practiced is fixed from Day 2's set (which included new + repeats) for this period.
-            *   *Clarification based on flowchart visual:* The flowchart shows "Second day: 7 new words, Repeat the wrong 3" and then "3-7 day: Same logic as before". This implies the words chosen on Day 2 become the set for Day 3-7. Any words gotten wrong on Day 2, 3, 4, 5, 6 are still tracked in `incorrectlyAnsweredLastQuiz` and potentially `masteredWordsThisCycle` for end-of-cycle stats, but they don't change the 10 words being *presented* for Day 3-7.
+1.  **Update `src/App.tsx` for Cycle Completion:**
+    *   Modify `advanceToNextDay()`:
+        *   When `currentCycleDay` is incremented to 8 (after the Day 7 quiz), the function will not prepare new words.
+        *   Instead, it will set `currentView` to `'results'`. A flag like `isCycleEnd` will be set to true.
 
-2.  **Testing Milestone 4:**
-    *   Complete Day 1 (10 new), get some wrong.
-    *   Complete Day 2 (new + repeats from Day 1), get some wrong/right.
-    *   Verify that Day 3 Learn View shows the exact same 10 words as Day 2.
-    *   Verify this continues for Day 4 through Day 7.
-    *   Throughout Days 2-7, `incorrectlyAnsweredLastQuiz` should still update after each quiz.
+2.  **Modify `src/components/ResultsView.tsx`:**
+    *   The existing `ResultsView` will be enhanced to handle both daily quiz results and the end-of-cycle summary.
+    *   It will accept an `isCycleEnd` boolean prop.
+    *   When `isCycleEnd` is `true`, it will:
+        *   Display a different title, e.g., "Cycle Complete!".
+        *   Show summary statistics for the entire cycle, such as `wordsToLearnThisCycle` and the final list of `incorrectlyAnsweredLastQuiz`.
+        *   The action button will be "Start New Cycle", which calls `startNewLearningCycle`.
 
-### Milestone 5: Day 8 Statistics & Cycle Reset
-
-1.  **Create `src/components/CycleStatsView.tsx`:**
-    *   This new component is dedicated to displaying end-of-cycle statistics.
-    *   **Props:**
-        *   `wordsLearnedInCycle: GeorgianWord[]`: All unique words presented during the cycle.
-        *   `wordsStruggledWithInCycle: GeorgianWord[]`: Words the user answered incorrectly in the final (Day 7) quiz.
-        *   `onStartNewCycle: () => void`: A function to be called by the "Start New Cycle" button.
-    *   **Layout:**
-        *   A clear title, e.g., "Cycle Complete!".
-        *   A section listing all words encountered during the cycle (`wordsLearnedInCycle`).
-        *   A section highlighting the words the user struggled with most recently (`wordsStruggledWithInCycle`).
-        *   A prominent "Start New Cycle" button.
-
-2.  **Update `src/App.tsx` for Day 8 and View Rendering:**
-    *   **Modify `advanceToNextDay()`:**
-        *   When `currentCycleDay` is incremented to 8, the function should set `currentView` to `'cycle_stats'` instead of calling `prepareWordsForDay(8)`.
-    *   **Update View Rendering Logic:**
-        *   In the main render function of `App.tsx`, add a condition to render the new `CycleStatsView` component when `currentView === 'cycle_stats'`.
-        *   Pass the required props to `CycleStatsView`: `learningCycleState.wordsToLearnThisCycle` (as `wordsLearnedInCycle`), the final `learningCycleState.incorrectlyAnsweredLastQuiz` (as `wordsStruggledWithInCycle`), and the `startNewLearningCycle` function (`onStartNewCycle`).
-
-4.  **Testing Milestone 5:**
+3.  **Testing Milestone 4:**
     *   Complete a full 7-day cycle.
-    *   After the Day 7 quiz, verify the app navigates to `CycleStatsView`.
-    *   Verify the statistics displayed are accurate (all words encountered, and words incorrect on the Day 7 quiz).
-    *   Clicking "Start New Cycle" should reset the state and take the user to Day 1 Learn View with 10 new random words.
+    *   After the Day 7 quiz, verify the app navigates to the `ResultsView`.
+    *   Verify the `ResultsView` shows the end-of-cycle statistics and a "Start New Cycle" button.
+    *   Clicking the button should start a fresh cycle on Day 1 with 10 new words.
 
 ### (Future Enhancement) Milestone 6: LocalStorage Persistence
 
