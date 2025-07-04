@@ -17,7 +17,40 @@ Implement a multi-day learning cycle that:
 *   Provides statistics at the end of an 8-day cycle.
 *   All state management will be in-memory for the duration of a single user session.
 
-## 4. Core Solution (Breadboarding for Enhanced Cycle)
+## 4. Learning Flow and Memory Scheme (Based on Figma Design)
+
+This section outlines the visual and logical flow of a single learning session, which forms the basis for the user's memory retention strategy.
+
+1.  **Cycle Initiation:**
+    *   The user starts a new learning session ("Beginning of the cycle").
+    *   The application selects 10 new, unlearned words from the total word pool.
+
+2.  **Learning Phase:**
+    *   The user is presented with these 10 words, including their transcriptions and translations, allowing for initial memorization.
+    *   *(Future Scope)*: The application saves this set of 10 words to the device's local storage to ensure session persistence.
+
+3.  **Quiz Phase Initiation:**
+    *   The user presses a "Start" button to begin the interactive quiz.
+
+4.  **Interactive Quiz Loop (for each of the 10 words):**
+    *   The application randomly selects one word from the current 10-word set.
+    *   It then randomly chooses one of three quiz formats:
+        *   **Standard Quiz:** Georgian word shown, user selects from multiple English options.
+        *   **Text-Field Quiz:** Georgian word shown, user types the English translation.
+        *   **Reversed Quiz:** English word shown, user selects from multiple Georgian options.
+    *   The user submits their answer.
+
+5.  **Feedback and Progression:**
+    *   **Correct Answer:** The user receives positive feedback ("Correct, you can get the next one.") and moves to the next word.
+    *   **Incorrect Answer:** The user receives corrective feedback ("Not correct, lets see get the word now.") and is shown the correct answer before proceeding.
+    *   The application internally marks the word as "learned" for that session and notes the quiz type that led to the correct answer. This data is crucial for tracking which learning methods are most effective for the user.
+
+6.  **Cycle Completion:**
+    *   After quizzing all 10 words, the user is presented with a summary. The logic for what happens next (e.g., advancing to a new day with repeated words) is detailed in the milestones below.
+
+---
+
+## 5. Core Solution (Breadboarding for Enhanced Cycle)
 
 We will modify the existing React component structure and state management (`App.tsx`, `src/types/app.ts`) to accommodate the new learning cycle.
 
@@ -70,9 +103,19 @@ We will modify the existing React component structure and state management (`App
 *   **Quiz View:** Uses `wordsForCurrentDay`. After quiz, calls `processQuizResults` and then `advanceToNextDay`. If `currentCycleDay` becomes 8 (after advancing), navigate to 'results'. Otherwise, navigate to 'learn' for the next day's words.
 *   **Results View (End of Cycle - Day 8):** Displays statistics: `wordsToLearnThisCycle` (all words encountered) and `incorrectlyAnsweredThisCycle` (words the user ultimately struggled with in the cycle). Button to "Start New Cycle".
 
-## 5. Key Functionality (Step-by-Step Implementation)
+## 6. Key Functionality (Step-by-Step Implementation)
 
 This plan assumes modifications to the existing React + TypeScript + Vite + shadcn/ui project.
+
+### Milestone 0: UI/UX Prototyping (Learning Space Design)
+
+1.  **Objective:** Translate the abstract flow from the "Learning Flow and Memory Scheme" into concrete UI components and views.
+2.  **Tasks:**
+    *   Design a clear, intuitive layout for the "Learn View" where users see the 10 words before the quiz.
+    *   Create mockups for the three different quiz types (Standard, Text-Field, Reversed) to ensure a consistent user experience.
+    *   Design the feedback modals/views for both correct and incorrect answers.
+    *   Wireframe the navigation flow between the Learn View, the different Quiz Views, and the end-of-cycle summary.
+3.  **Deliverable:** A set of simple wireframes or a clickable prototype (using a tool like Figma or just component placeholders in the code) that validates the user journey for a single 10-word cycle. This milestone ensures the technical implementation has a clear visual guide.
 
 ### Milestone 1: Foundational State and Day 1 Logic ✅ COMPLETED
 
@@ -248,7 +291,7 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
 *   On initial app load, attempt to load this state from `localStorage` and rehydrate `learningCycleState`. If no saved state, start a fresh cycle.
 *   This would allow users to close the browser and resume their learning cycle.
 
-## 6. No-Gos (For This Enhancement Iteration v1.0)
+## 7. No-Gos (For This Enhancement Iteration v1.0)
 
 *   **Full "not first week" logic from the flowchart:** The part about "or, if it's not first week, the combination of wrong + new words" for Day 1 is deferred. This version will always start Day 1 of a new cycle with 10 purely random new words.
 *   **Backend data storage and user accounts.**
@@ -256,7 +299,7 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
 *   Detailed tracking of *how many times* a word was wrong/right.
 *   `localStorage` persistence (deferred to a potential Milestone 6).
 
-## 7. Deliverables (For Enhanced Learning Cycle v1.0)
+## 8. Deliverables (For Enhanced Learning Cycle v1.0)
 
 1.  **Updated `src/App.tsx`**: Main component with new state management for the learning cycle, new logic functions (`startNewLearningCycle`, `prepareWordsForDay`, `processQuizResults`, `advanceToNextDay`).
 2.  **Updated `src/types/app.ts`**: New/modified TypeScript type definitions for the learning cycle state.
@@ -264,4 +307,4 @@ This plan assumes modifications to the existing React + TypeScript + Vite + shad
 4.  **New `src/components/CycleStatsView.tsx`** component.
 5.  All functionality described in Milestones 1-5, working within a single browser session.
 
-This detailed plan should provide a clear roadmap for a junior developer to implement the enhanced learning cycle. Each milestone is designed to be a testable increment. 
+This detailed plan should provide a clear roadmap for a junior developer to implement the enhanced learning cycle. Each milestone is designed to be a testable increment.

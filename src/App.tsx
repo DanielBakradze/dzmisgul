@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { AppView, QuizState, GeorgianWord } from './types/app';
-import { dailyWords } from './data/words';
+import React, { useState } from 'react';
+import { AppView, QuizState } from './types/app';
 import HomeView from './components/HomeView';
 import LearnView from './components/LearnView';
 import QuizView from './components/QuizView';
@@ -8,15 +7,6 @@ import ResultsView from './components/ResultsView';
 
 function App() {
   const [currentView, setCurrentView] = useState<AppView>('home');
-  const [currentDay] = useState(1);
-  const [wordsForCurrentDay, setWordsForCurrentDay] = useState<GeorgianWord[]>([]);
-
-  useEffect(() => {
-    // In a real app, you might fetch this or have more complex logic
-    // For now, we'll just use the first set of daily words
-    setWordsForCurrentDay(dailyWords[currentDay - 1] || []);
-  }, [currentDay]);
-
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestionIndex: 0,
     score: 0,
@@ -30,16 +20,9 @@ function App() {
       {/* Ensure content is constrained for mobile, e.g., w-full max-w-sm or similar */}
       <div className="w-full max-w-md">
         {currentView === 'home' && <HomeView onNavigate={setCurrentView} />}
-        {currentView === 'learn' && 
-          <LearnView 
-            wordsForCurrentDay={wordsForCurrentDay} 
-            currentDay={currentDay} 
-            onNavigate={setCurrentView} 
-          />
-        }
+        {currentView === 'learn' && <LearnView onNavigate={setCurrentView} />}
         {currentView === 'quiz' && (
           <QuizView 
-            wordsForCurrentDay={wordsForCurrentDay}
             quizState={quizState}
             setQuizState={setQuizState}
             onNavigate={setCurrentView}
