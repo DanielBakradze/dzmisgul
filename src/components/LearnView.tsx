@@ -4,23 +4,22 @@ import { Badge } from '@/components/ui/badge';
 import { AppView, GeorgianWord } from '../types/app';
 
 interface LearnViewProps {
-  wordsForCurrentDay: GeorgianWord[];
-  currentDay: number;
+  words: GeorgianWord[];
   onNavigate: (view: AppView) => void;
 }
 
-export default function LearnView({ wordsForCurrentDay, currentDay, onNavigate }: LearnViewProps) {
+export default function LearnView({ words, onNavigate }: LearnViewProps) {
   return (
     <Card className="w-full"> {/* Full width for mobile */}
       <CardHeader>
-        <CardTitle>Day {currentDay} Words</CardTitle>
+        <CardTitle>Words to Learn</CardTitle>
         <CardDescription>
           Study these Georgian words before taking the quiz
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3">
-          {wordsForCurrentDay.map((word) => (
+          {words.map((word) => (
             <div key={word.id} className="flex items-center justify-between p-3 border rounded">
               <div>
                 <Badge variant="secondary" className="text-lg font-medium">

@@ -35,9 +35,9 @@ This section outlines the visual and logical flow of a single learning session, 
 4.  **Interactive Quiz Loop (for each of the 10 words):**
     *   The application randomly selects one word from the current 10-word set.
     *   It then randomly chooses one of three quiz formats:
-        *   **Standard Quiz:** Georgian word shown, user selects from multiple English options.
-        *   **Text-Field Quiz:** Georgian word shown, user types the English translation.
-        *   **Reversed Quiz:** English word shown, user selects from multiple Georgian options.
+        *   **Quiz (Multiple Choice):** This is the standard format where a Georgian word is presented, and the user must select the correct English translation from a list of options. This tests recognition.
+        *   **Reversed Quiz (Multiple Choice):** The reverse of the standard quiz. An English word is shown, and the user must select the correct Georgian translation from a list of options. This also tests recognition, but from the target language back to the source.
+        *   **Field (Text Input):** A Georgian word is shown, and the user must type the correct English translation into a text field. This is a more active recall test, requiring the user to produce the answer without prompts.
     *   The user submits their answer.
 
 5.  **Feedback and Progression:**

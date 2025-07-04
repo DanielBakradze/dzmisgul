@@ -3,64 +3,65 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { AppView, QuizState, GeorgianWord, CycleWord } from '../types/app';
-import { useState } from 'react';
-
-interface AnsweredWord {
-  word: CycleWord;
-  correct: boolean;
-}
+import { GeorgianWord, AnsweredWord } from '../types/app';
+import { useState, useMemo } from 'react';
 
 interface QuizViewProps {
-  wordsForCurrentDay: CycleWord[];
-  quizState: QuizState;
-  setQuizState: (state: QuizState) => void;
-  onNavigate: (view: AppView) => void;
+  words: GeorgianWord[];
   onQuizComplete: (answeredWords: AnsweredWord[]) => void;
 }
 
-export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, onNavigate, onQuizComplete }: QuizViewProps) {
-  const [answeredWords, setAnsweredWords] = useState<AnsweredWord[]>([]);
-  const currentWord = wordsForCurrentDay[quizState.currentQuestionIndex];
+export default function QuizView({ words, onQuizComplete }: QuizViewProps) {
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+    const [showFeedback, setShowFeedback] = useState(false);
+    const [answeredWords, setAnsweredWords] = useState<AnsweredWord[]>([]);
+
+  const currentWord = words[currentQuestionIndex];
   
-  const generateOptions = () => {
-    if (!currentWord) return []; // Handle case where currentWord might be undefined
+  const options = useMemo(() => {
+    if (!currentWord) return [];
     const correctAnswer = currentWord.english;
-    const incorrectAnswers = wordsForCurrentDay
-      .filter(word => word.english !== correctAnswer)
-      .map(word => word.english)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3);
+    const incorrectAnswers = words
+      .filter(word => word.id !== currentWord.id)
+      .map(word => word.english);
     
-    return [...incorrectAnswers, correctAnswer].sort(() => 0.5 - Math.random());
-  };
-
-  const options = generateOptions();
-  const progress = ((quizState.currentQuestionIndex + 1) / wordsForCurrentDay.length) * 100;
-
-  const handleAnswer = (selectedAnswer: string) => {
-    const isCorrect = selectedAnswer === currentWord.english;
+    shuffleArray(incorrectAnswers);
     
+    const finalOptions = incorrectAnswers.slice(0, 3);
+    finalOptions.push(correctAnswer);
+    
+    shuffleArray(finalOptions);
+    return finalOptions;
+  }, [currentQuestionIndex, words]);
+
+  function shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  const progress = ((currentQuestionIndex + 1) / words.length) * 100;
+
+  const handleAnswer = (answer: string) => {
+    const isCorrect = answer === currentWord.english;
+    setSelectedAnswer(answer);
+    setShowFeedback(true);
+    if (isCorrect) {
+      setScore(score + 1);
+    }
     setAnsweredWords([...answeredWords, { word: currentWord, correct: isCorrect }]);
-
-    setQuizState({
-      ...quizState,
-      selectedAnswer,
-      showFeedback: true,
-      score: isCorrect ? quizState.score + 1 : quizState.score
-    });
   };
 
   const handleNext = () => {
-    if (quizState.currentQuestionIndex === wordsForCurrentDay.length - 1) {
-      onQuizComplete([...answeredWords, { word: currentWord, correct: quizState.selectedAnswer === currentWord.english }]);
+    if (currentQuestionIndex === words.length - 1) {
+      onQuizComplete(answeredWords);
     } else {
-      setQuizState({
-        ...quizState,
-        currentQuestionIndex: quizState.currentQuestionIndex + 1,
-        selectedAnswer: null,
-        showFeedback: false
-      });
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
     }
   };
 
@@ -69,8 +70,8 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
       <Card className="w-full">
         <CardContent className="text-center p-6">
           <p>No words available for quiz.</p>
-          <Button onClick={() => onNavigate('home')} className="mt-4">
-            Back to Home
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Start Over
           </Button>
         </CardContent>
       </Card>
@@ -82,14 +83,14 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
       <CardHeader>
         <CardTitle>Quiz Time!</CardTitle>
         <CardDescription>
-          Question {quizState.currentQuestionIndex + 1} of {wordsForCurrentDay.length}
+          Question {currentQuestionIndex + 1} of {words.length}
         </CardDescription>
         <Progress value={progress} className="w-full" />
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center">
           <Badge variant="outline">
-            Score: {quizState.score}/{wordsForCurrentDay.length}
+            Score: {score}/{words.length}
           </Badge>
         </div>
 
@@ -100,7 +101,7 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
           <p className="text-sm text-muted-foreground">{currentWord.transcription}</p>
         </div>
 
-        {!quizState.showFeedback && (
+        {!showFeedback && (
           <div className="space-y-2">
             <p className="text-center text-muted-foreground">
               Select the English translation:
@@ -118,9 +119,9 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
           </div>
         )}
 
-        {quizState.showFeedback && (
+        {showFeedback && (
           <div className="space-y-4">
-            {quizState.selectedAnswer === currentWord.english ? (
+            {selectedAnswer === currentWord.english ? (
               <Alert>
                 <AlertDescription className="text-center">
                   🎉 Congratulations! That's correct!
@@ -135,20 +136,11 @@ export default function QuizView({ wordsForCurrentDay, quizState, setQuizState, 
             )}
 
             <div className="flex flex-col sm:flex-row gap-2"> {/* Stack buttons on small screens */}
-              {quizState.selectedAnswer !== currentWord.english && (
-                <Button 
-                  variant="outline"
-                  onClick={() => onNavigate('learn')}
-                  className="w-full"
-                >
-                  Back to Learning
-                </Button>
-              )}
               <Button 
                 onClick={handleNext}
                 className="w-full"
               >
-                {quizState.currentQuestionIndex === wordsForCurrentDay.length - 1 ? 'View Results' : 'Next Question'}
+                {currentQuestionIndex === words.length - 1 ? 'View Results' : 'Next Question'}
               </Button>
             </div>
           </div>

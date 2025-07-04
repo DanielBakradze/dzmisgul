@@ -6,21 +6,18 @@ import { AppView } from '../types/app';
 interface ResultsViewProps {
   score: number;
   total: number;
-  onNavigate: (view: AppView) => void;
-  isCycleEnd?: boolean;
+  onNextDay: () => void;
 }
 
-export default function ResultsView({ score, total, onNavigate, isCycleEnd = false }: ResultsViewProps) {
+export default function ResultsView({ score, total, onNextDay }: ResultsViewProps) {
   const percentage = total > 0 ? (score / total) * 100 : 0;
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>{isCycleEnd ? 'Cycle Complete!' : 'Quiz Results'}</CardTitle>
+        <CardTitle>Quiz Results</CardTitle>
         <CardDescription>
-          {isCycleEnd
-            ? `You've completed the 8-day cycle.`
-            : 'Here is a summary of your performance.'}
+          Here is a summary of your performance.
         </CardDescription>
       </CardHeader>
       <CardContent className="text-center space-y-4">
@@ -28,8 +25,8 @@ export default function ResultsView({ score, total, onNavigate, isCycleEnd = fal
           {score} / {total}
         </div>
         <p className="text-lg text-muted-foreground">({percentage.toFixed(0)}%)</p>
-        <Button onClick={() => onNavigate('home')} className="w-full">
-          {isCycleEnd ? 'Start New Cycle' : 'Back to Home'}
+        <Button onClick={onNextDay} className="w-full">
+          Continue to Next Day
         </Button>
       </CardContent>
     </Card>
